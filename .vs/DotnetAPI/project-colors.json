@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "dd6430a0-8cc0-4b7c-b2ee-d19b8d6e871e": {
+      "ProjectGuid": "dd6430a0-8cc0-4b7c-b2ee-d19b8d6e871e",
+      "DisplayName": "DotnetAPI",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}
