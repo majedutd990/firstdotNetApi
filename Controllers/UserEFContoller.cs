@@ -12,14 +12,12 @@ namespace DotnetAPI.Controllers
     [Route("[controller]")]
     public class UserEfController : ControllerBase
     {
-        private DataContextEf _ef;
         private IMapper _mapper;
         IUserRepository _userRepository;
 
         public UserEfController(IConfiguration configuration, IUserRepository userRepository)
         {
-            _ef = new DataContextEf(configuration);
-            _userRepository = _userRepository;
+            _userRepository = userRepository;
 
             _mapper = new Mapper(new MapperConfiguration(
                 cfg =>
@@ -31,27 +29,21 @@ namespace DotnetAPI.Controllers
         [HttpGet("Users")]
         public IEnumerable<User> GetUsers()
         {
-            IEnumerable<User> users = _ef.Users.ToList<User>();
-            return users;
+            return _userRepository.GetUsers();
         }
 
         // GET: api/<UserController>
         [HttpGet("Users/{userId}")]
         public User GetSingleUser(int userId)
         {
-            User user = _ef.Users.FirstOrDefault(u => u.UserId == userId) ??
-                        throw new InvalidOperationException("failed to get user");
-            return user;
+            return _userRepository.GetSingleUser(userId);
         }
 
         // PUT api/<UserController>/5
         [HttpPut("Users")]
         public IActionResult EditUser(User user)
         {
-            User userDb = _ef.Users.FirstOrDefault(u => u.UserId == user.UserId) ??
-                          throw new InvalidOperationException("failed to get user");
-
-
+            User userDb = _userRepository.GetSingleUser(user.UserId);
             userDb.Active = user.Active;
             userDb.FirstName = user.FirstName;
             userDb.LastName = user.LastName;
@@ -84,8 +76,7 @@ namespace DotnetAPI.Controllers
         [HttpDelete("Users/{id}")]
         public IActionResult Delete(int id)
         {
-            User userDb = _ef.Users.FirstOrDefault(u => u.UserId == id) ??
-                          throw new InvalidOperationException("failed to get user");
+            User userDb = _userRepository.GetSingleUser(id);
             _userRepository.RemoveEntity<User>(userDb);
             if (_userRepository.SaveChanges())
             {
@@ -98,23 +89,18 @@ namespace DotnetAPI.Controllers
         [HttpGet("UserSalary/All")]
         public IEnumerable<UserSalary> GetUserSalaries()
         {
-            return _ef.UserSalary.ToList<UserSalary>();
+            return _userRepository.GetUserSalaries();
         }
 
         [HttpGet("UserSalary/{id}")]
         public UserSalary GetSalary(int id)
         {
-            UserSalary salary = _ef.UserSalary.FirstOrDefault(us => us.UserId == id) ??
-                                throw new InvalidOperationException("no such record");
-            return salary;
+            return _userRepository.GetSalary(id);
         }
 
         [HttpPost("UserSalary")]
         public IActionResult AddSalary(UserSalary userSalary)
         {
-            User user = _ef.Users.FirstOrDefault(u => u.UserId == userSalary.UserId) ??
-                        throw new InvalidOperationException("failed to get user");
-
             _userRepository.AddEntity<UserSalary>(userSalary);
             if (_userRepository.SaveChanges())
             {
@@ -127,11 +113,9 @@ namespace DotnetAPI.Controllers
         [HttpPut("UserSalary/{id}")]
         public IActionResult UpdateSalary(UserSalary userSalary)
         {
-            User user = _ef.Users.FirstOrDefault(u => u.UserId == userSalary.UserId) ??
-                        throw new InvalidOperationException("failed to get user");
+            User user = _userRepository.GetSingleUser(userSalary.UserId);
 
-            UserSalary salaryToBe = _ef.UserSalary.FirstOrDefault(us => us.UserId == userSalary.UserId) ??
-                                    throw new InvalidOperationException("no such record");
+            UserSalary salaryToBe = _userRepository.GetSalary(userSalary.UserId);
             salaryToBe.AvgSalary = userSalary.AvgSalary;
             salaryToBe.Salary = userSalary.Salary;
             if (_userRepository.SaveChanges())
@@ -146,10 +130,7 @@ namespace DotnetAPI.Controllers
         [HttpDelete("UserSalary/{id}")]
         public IActionResult DeleteUserSalary(int id)
         {
-            User user = _ef.Users.FirstOrDefault(u => u.UserId == id) ??
-                        throw new InvalidOperationException("failed to get user");
-            UserSalary userSalary = _ef.UserSalary.FirstOrDefault(u => u.UserId == id) ??
-                                    throw new InvalidOperationException("failed to get user");
+            UserSalary userSalary = _userRepository.GetSalary(id);
             _userRepository.RemoveEntity<UserSalary>(userSalary);
             if (_userRepository.SaveChanges())
             {
@@ -162,22 +143,19 @@ namespace DotnetAPI.Controllers
         [HttpGet("UserJobInfo/All")]
         public IEnumerable<UserJobInfo> GetUserJobInfos()
         {
-            return _ef.UserJobInfo.ToList<UserJobInfo>();
+            return _userRepository.GetUserJobInfos();
         }
 
         [HttpGet("UserJobInfo/{id}")]
         public UserJobInfo GetJobInfo(int id)
         {
-            UserJobInfo jobInfo = _ef.UserJobInfo.FirstOrDefault(us => us.UserId == id) ??
-                                  throw new InvalidOperationException("no such record");
-            return jobInfo;
+            return _userRepository.GetJobInfo(id);
         }
 
         [HttpPost("UserJobInfo")]
         public IActionResult AddUserJoInfo(UserJobInfo jobInfo)
         {
-            User user = _ef.Users.FirstOrDefault(u => u.UserId == jobInfo.UserId) ??
-                        throw new InvalidOperationException("failed to get user");
+            User user = _userRepository.GetSingleUser(jobInfo.UserId);
             _userRepository.AddEntity<UserJobInfo>(jobInfo);
             if (_userRepository.SaveChanges())
             {
@@ -190,10 +168,8 @@ namespace DotnetAPI.Controllers
         [HttpPut("UserJobInfo")]
         public IActionResult UpdateUserJobInfo(UserJobInfo jobInfo)
         {
-            User user = _ef.Users.FirstOrDefault(u => u.UserId == jobInfo.UserId) ??
-                        throw new InvalidOperationException("failed to get user");
-            UserJobInfo infoToBe = _ef.UserJobInfo.FirstOrDefault(us => us.UserId == jobInfo.UserId) ??
-                                   throw new InvalidOperationException("no such record");
+            User user = _userRepository.GetSingleUser(jobInfo.UserId);
+            UserJobInfo infoToBe = _userRepository.GetJobInfo(jobInfo.UserId);
             infoToBe.Department = jobInfo.Department;
             infoToBe.JobTitle = jobInfo.JobTitle;
             if (_userRepository.SaveChanges())
@@ -208,10 +184,7 @@ namespace DotnetAPI.Controllers
         [HttpDelete("UserJobInfo/{id}")]
         public IActionResult UserJobInfoDelete(int id)
         {
-            User user = _ef.Users.FirstOrDefault(u => u.UserId == id) ??
-                        throw new InvalidOperationException("failed to get user");
-            UserJobInfo userJi = _ef.UserJobInfo.FirstOrDefault(u => u.UserId == id) ??
-                                 throw new InvalidOperationException("failed to get user");
+            UserJobInfo userJi = _userRepository.GetJobInfo(id);
             _userRepository.RemoveEntity<UserJobInfo>(userJi);
             if (_userRepository.SaveChanges())
             {

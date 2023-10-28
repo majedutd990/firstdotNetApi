@@ -1,4 +1,6 @@
-﻿namespace DotnetAPI.Data
+﻿using DotnetAPI.Models;
+
+namespace DotnetAPI.Data
 {
     public class UserRepository : IUserRepository
     {
@@ -22,6 +24,43 @@
         public void RemoveEntity<T>(T entityToBeRemoved)
         {
             if (entityToBeRemoved != null) _ef.Remove(entityToBeRemoved);
+        }
+
+        public IEnumerable<User> GetUsers()
+        {
+            IEnumerable<User> users = _ef.Users.ToList<User>();
+            return users;
+        }
+
+        public IEnumerable<UserSalary> GetUserSalaries()
+        {
+            return _ef.UserSalary.ToList<UserSalary>();
+        }
+
+        public IEnumerable<UserJobInfo> GetUserJobInfos()
+        {
+            return _ef.UserJobInfo.ToList<UserJobInfo>();
+        }
+
+        public User GetSingleUser(int userId)
+        {
+            User user = _ef.Users.FirstOrDefault(u => u.UserId == userId) ??
+                        throw new InvalidOperationException("failed to get user");
+            return user;
+        }
+
+        public UserSalary GetSalary(int id)
+        {
+            UserSalary salary = _ef.UserSalary.FirstOrDefault(us => us.UserId == id) ??
+                                throw new InvalidOperationException("no such record");
+            return salary;
+        }
+
+        public UserJobInfo GetJobInfo(int id)
+        {
+            UserJobInfo jobInfo = _ef.UserJobInfo.FirstOrDefault(us => us.UserId == id) ??
+                                  throw new InvalidOperationException("no such record");
+            return jobInfo;
         }
     }
 }
