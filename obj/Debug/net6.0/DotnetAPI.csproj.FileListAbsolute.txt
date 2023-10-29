@@ -74,3 +74,4 @@ C:\Users\majed\source\repos\DotnetAPI\bin\Debug\net6.0\Microsoft.Extensions.Logg
 C:\Users\majed\source\repos\DotnetAPI\bin\Debug\net6.0\Microsoft.Extensions.Logging.Abstractions.dll
 C:\Users\majed\source\repos\DotnetAPI\bin\Debug\net6.0\Microsoft.Extensions.Options.dll
 C:\Users\majed\source\repos\DotnetAPI\bin\Debug\net6.0\Microsoft.Extensions.Primitives.dll
+C:\Users\majed\source\repos\DotnetAPI\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

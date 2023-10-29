@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "JB/xXXSB2TB1HOszPwESOaRRAA5KnNR/3Mqv6X1m8a2+QAncWDBqaNVneXcUBxNyEDi5dhiXUOGckJDAS50rfw==",
+  "dgSpecHash": "aLnwOYpWLd40+d4WNkuP4SUdxHPs1Bu/CQRs4KVzO10AMN9o8sqtauAhRHVaAqgz630yH1KmVbDOWwlWzL1pig==",
   "success": true,
   "projectFilePath": "C:\\Users\\majed\\source\\repos\\DotnetAPI\\DotnetAPI.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,7 @@
     "C:\\Users\\majed\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\majed\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
     "C:\\Users\\majed\\.nuget\\packages\\dapper\\2.1.15\\dapper.2.1.15.nupkg.sha512",
+    "C:\\Users\\majed\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.4\\microsoft.aspnetcore.authentication.jwtbearer.6.0.4.nupkg.sha512",
     "C:\\Users\\majed\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\majed\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\majed\\.nuget\\packages\\microsoft.data.sqlclient\\5.1.1\\microsoft.data.sqlclient.5.1.1.nupkg.sha512",
