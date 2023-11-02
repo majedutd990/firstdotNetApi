@@ -1,7 +1,13 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Data;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using Dapper;
+using DotnetAPI.Data;
+using DotnetAPI.DTOs;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DotnetAPI.Helpers
@@ -9,10 +15,14 @@ namespace DotnetAPI.Helpers
     public class AuthHelpers
     {
         private IConfiguration _config;
+        private readonly DataContextDapper _dapper;
+        private readonly AuthHelpers _auth;
+
 
         public AuthHelpers(IConfiguration configuration)
         {
             _config = configuration;
+            _dapper = new DataContextDapper(configuration);
         }
 
         public string CreateToken(int userId, string email)
@@ -49,6 +59,28 @@ namespace DotnetAPI.Helpers
                 1000,
                 256 / 8);
             return passwordHash;
+        }
+
+        public bool SetPassword(UserForLoginDto user)
+        {
+            byte[] passwordSalt = new byte[128 / 8];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                rng.GetNonZeroBytes(passwordSalt);
+            }
+
+
+            byte[] passwordHash = GetPasswordHash(user.Password, passwordSalt);
+
+            string sqlAddAuth = @"EXEC TutorialAppSchema.spRegisteratioin_Upsert 
+                                @Email = @EmailParam,
+                                @PasswordHash = @PasswordHashParam,
+                                @PasswordSalt = @PasswordSaltParam";
+            DynamicParameters sqlParams = new DynamicParameters();
+            sqlParams.Add("@EmailParam", user.Email, DbType.String);
+            sqlParams.Add("@PasswordHashParam", passwordHash, DbType.Binary);
+            sqlParams.Add("@PasswordSaltParam", passwordSalt, DbType.Binary);
+            return (_dapper.ExecuteSqlWithParams(sqlAddAuth, sqlParams));
         }
     }
 }

@@ -1,5 +1,8 @@
-﻿using DotnetAPI.Data;
+﻿using System.Data;
+using Dapper;
+using DotnetAPI.Data;
 using DotnetAPI.DTOs;
+using DotnetAPI.Helpers;
 using DotnetAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +13,13 @@ namespace DotnetAPI.Controllers
     [ApiController]
     public class UserCompleteController : ControllerBase
     {
-        private DataContextDapper _dapper;
+        private readonly DataContextDapper _dapper;
+        private readonly ReusableSql _reusableSql;
 
         public UserCompleteController(IConfiguration configuration)
         {
             _dapper = new DataContextDapper(configuration);
+            _reusableSql = new ReusableSql(configuration);
         }
 
         [HttpGet("TestConnection")]
@@ -29,26 +34,27 @@ namespace DotnetAPI.Controllers
         {
             string sql = @"EXEC TutorialAppSchema.spUsers_Get";
 
+            DynamicParameters sqlParams = new DynamicParameters();
             string parameters = "";
-
 
             if (userId != 0)
             {
-                parameters += ", @UserId=" + userId.ToString();
+                sqlParams.Add("@UserIdParams", userId, DbType.Int32);
+                parameters += ", @UserId= @UserIdParams";
             }
 
             if (isActive)
             {
-                parameters += ", @Active=" + isActive;
+                sqlParams.Add("@ActiveParams", isActive, DbType.Boolean);
+                parameters += ", @Active= @ActiveParams";
             }
 
             if (parameters.Length > 1)
             {
-                Console.WriteLine(parameters);
                 sql += parameters.Substring(1);
             }
 
-            IEnumerable<UserComplete> users = _dapper.LoadData<UserComplete>(sql);
+            IEnumerable<UserComplete> users = _dapper.LoadDataWithParameters<UserComplete>(sql, sqlParams);
             return users;
         }
 
@@ -57,18 +63,7 @@ namespace DotnetAPI.Controllers
         [HttpPut("UpsertUser")]
         public IActionResult UpsertUser(UserComplete user)
         {
-            string sql = @"EXEC TutorialAppSchema.spUser_Upsert
-                             @FirstName='" + user.FirstName +
-                         "', @LastName='" + user.LastName +
-                         "', @Email='" + user.Email +
-                         "', @Gender='" + user.Gender +
-                         "', @JobTitle='" + user.JobTitle +
-                         "', @Department='" + user.Department +
-                         "', @Salary='" + user.Salary +
-                         "', @Active='" + user.Active +
-                         "', @UserId='" + user.UserId + "'";
-
-            bool done = _dapper.ExecuteSql(sql);
+            bool done = _reusableSql.UpsertUser(user);
             if (done)
             {
                 return Ok();
@@ -82,9 +77,11 @@ namespace DotnetAPI.Controllers
         [HttpDelete("DeleteUser/{id}")]
         public IActionResult Delete(int id)
         {
-            string sql = @"EXEC TutorialAppSchema.spUsers_Delete @UserId='" + id.ToString() + "'";
+            string sql = @"EXEC TutorialAppSchema.spUsers_Delete @UserId= @UserIdParam ";
 
-            bool done = _dapper.ExecuteSql(sql);
+            DynamicParameters sqlParams = new DynamicParameters();
+            sqlParams.Add("@UserIdParam", id, DbType.Int32);
+            bool done = _dapper.ExecuteSqlWithParams(sql, sqlParams);
             if (done)
             {
                 return Ok();
